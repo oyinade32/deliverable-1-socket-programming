@@ -6,15 +6,20 @@ This project implements a TCP client-server communication system using Rust's st
 
 The client accepts an integer from the user, sends the client's name and number to the server, receives the server's response, and calculates the sum of both numbers.
 
-The server listens for incoming TCP connections, receives client information, generates a response using a predefined integer, calculates the sum, and sends its name and number back to the client.
+The server listens for incoming TCP connections, receives client information, validates the integer, calculates the sum using a predefined server number, and sends its name and number back to the client.
+
+The project also demonstrates cross-language communication between a Rust server and a Python client over a remote TCP connection.
 
 ## Technologies Used
 
 - Programming Language: Rust
-- Networking Protocol: TCP
+- Additional Client Language:** Python (used for remote interoperability testing)
+- Networking Protocol:TCP
 - Rust Libraries: `std::net`, `std::io`
-- Development Environment: Visual Studio Code
-- Operating System: macOS
+- Python Library:`socket`
+- Development Environment:Visual Studio Code
+- Operating Systems: macOS and Linux (Ubuntu)
+- Private Networking:Tailscale
 
 ## Project Structure
 
@@ -37,7 +42,7 @@ deliverable-1-socket-programming/
 
 ### Client
 
-The client program:
+The Rust client:
 
 1. Prompts the user to enter an integer between 1 and 100.
 2. Validates the entered integer.
@@ -50,7 +55,7 @@ The client program:
 
 ### Server
 
-The server program:
+The Rust server:
 
 1. Binds to port `5050` and listens for incoming TCP connections.
 2. Accepts client connections.
@@ -70,7 +75,7 @@ The client and server exchange newline-delimited messages using a pipe (`|`) as 
 **Client message:**
 
 ```text
-Client of Oyinade Olukoya|25
+Client of Francis Ntim|25
 ```
 
 **Server response:**
@@ -79,11 +84,11 @@ Client of Oyinade Olukoya|25
 Server of Oyinade Olukoya|10
 ```
 
-The client and server use TCP communication on port `5050`.
+Both programs communicate using TCP on port `5050`.
 
-## Configuration
+## Network Configuration
 
-The server listens on all available network interfaces:
+The Rust server listens on all available network interfaces:
 
 ```rust
 let address = "0.0.0.0:5050";
@@ -101,7 +106,7 @@ For local testing, the client can instead use:
 let address = "127.0.0.1:5050";
 ```
 
-For remote testing, the client must use the server's reachable Tailscale IP address, and both devices must have an active Tailscale connection with appropriate network access.
+For remote testing, both computers must be connected to the same Tailscale network, with appropriate network access.
 
 ## How to Run the Application
 
@@ -117,9 +122,9 @@ cargo run --bin server
 
 The server will display a listening message and wait for client connections.
 
-### 2. Start the client
+### 2. Start the Rust client
 
-Open a second terminal in the same project directory and run:
+Open a second terminal in the project directory and run:
 
 ```bash
 cargo run --bin client
@@ -127,53 +132,66 @@ cargo run --bin client
 
 Enter an integer between 1 and 100 when prompted.
 
-### 3. Example Output
+### 3. Remote testing with a Python client
 
-**Client output:**
+The remote interoperability test was performed using:
 
-```text
-Enter an integer between 1 and 100:
-25
-Client name: Client of Oyinade Olukoya
-Client number: 25
-Connecting to server...
-TCP connection established.
-Sent client name and number to server.
-Server name: Server of Oyinade Olukoya
-Client name: Client of Oyinade Olukoya
-Client number: 25
-Server number: 10
-Sum: 25 + 10 = 35
-Client has finished.
+- **Server:** Rust running on macOS.
+- **Client:** Python running on Ubuntu Linux.
+- **Network:** Tailscale.
+- **Server Tailscale IP:** `100.114.182.117`.
+- **Server Port:** `5050`.
+- **Client:** Francis Ntim.
+
+The Python client used the standard `socket` library to establish a TCP connection with the Rust server.
+
+Run the Python client from its project directory using:
+
+```bash
+python3 client.py
 ```
 
-**Server output:**
+The client connects to the Rust server using its Tailscale IP address and port.
+
+## Example Test Results
+
+**Remote Rust server output:**
 
 ```text
 Server of Oyinade Olukoya is listening on 0.0.0.0:5050.
 Waiting for a client connection...
-Received message: Client of Oyinade Olukoya|25
-Client name: Client of Oyinade Olukoya
+Connection accepted from 100.69.50.127:45638.
+Received message: Client of Francis Ntim|25
+Client name: Client of Francis Ntim
 Server name: Server of Oyinade Olukoya
 Client number: 25
 Server number: 10
 Sum: 25 + 10 = 35
 Server reply sent to client.
 Client connection finished.
+Waiting for a client connection...
 ```
 
-## Testing
+**Expected calculation:**
+
+```text
+25 + 10 = 35
+```
+
+## Testing and Verification
 
 The following tests have been performed:
 
-- Successful TCP connection between the client and server.
-- Successful transmission of the client's name and integer.
-- Successful transmission of the server's name and integer.
+- Successful local TCP communication between the Rust client and server.
+- Successful transmission of client name and integer.
+- Successful transmission of server name and integer.
 - Correct calculation of the sum.
-- Successful local communication using the Tailscale IP address.
+- Successful Tailscale connectivity between the Mac and Ubuntu computers.
+- Successful remote TCP connection from the Ubuntu computer to the macOS server.
+- Successful communication between a Python client and Rust server.
 - Server termination when an out-of-range integer (`0`) is received.
 
-**Remote testing with another student's computer:** Pending.
+The remote server-side test confirmed that the Rust server received Francis Ntim's client name and integer, calculated the sum, and successfully sent its reply.
 
 ## Additional Test Program
 
